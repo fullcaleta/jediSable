@@ -5,26 +5,23 @@ const axios = require('axios');
 const app = express();
 const PORT = 3000;
 
-let clientMap = {}; // Mapa para almacenar IPs y sus nombres
-let clientCounter = 0; // Contador para asignar nombres
+let clientMap = {}; 
+let clientCounter = 0; 
 
-// Configurar Express para confiar en los proxies
 app.set('trust proxy', true);
 
-// Middleware para registrar solicitudes y asignar nombres a las IPs
 app.use(async (req, res, next) => {
-    const userIp = req.ip; // IP del cliente
-
-    // Verificar si la IP ya tiene un nombre asignado
+    const userIp = req.ip; 
+    
     if (!clientMap[userIp]) {
-        clientCounter++; // Incrementar el contador
-        clientMap[userIp] = `Cliente ${clientCounter}`; // Asignar un nombre único
+        clientCounter++; 
+        clientMap[userIp] = `Cliente ${clientCounter}`; 
     }
 
-    const clientId = clientMap[userIp]; // Obtener el nombre del cliente
+    const clientId = clientMap[userIp]; 
 
     try {
-        // Obtener la IP pública del cliente desde un servicio externo
+        
         const response = await axios.get('https://api.ipify.org?format=json');
         const publicIp = response.data.ip;
 
@@ -36,15 +33,15 @@ app.use(async (req, res, next) => {
     next();
 });
 
-// Middleware para servir archivos estáticos
+
 app.use(express.static(path.join(__dirname)));
 
-// Ruta principal
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Iniciar el servidor
+
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
