@@ -10,20 +10,23 @@ let joinTimeout;
 let mediaRecorder;
 let recordedChunks = [];
 
+// Función para solicitar permisos de micrófono y cámara
 async function requestPermissions() {
     try {
         localTracks = await AgoraRTC.createMicrophoneAndCameraTracks();
-        return true;
+        return true; // Permisos concedidos
     } catch (error) {
-        showPermissionAlert();
-        return false;
+        showPermissionAlert(); // Mostrar alerta de permisos
+        return false; // Permisos no concedidos
     }
 }
 
+// Mostrar alerta de permisos
 function showPermissionAlert() {
     alert("Se requieren permisos de micrófono y cámara para continuar. ¡No te vayas! 😱 Arriba en el 🔒, puedes acceder para otorgar los permisos correspondientes.");
 }
 
+// Función para unirse y mostrar el stream local
 let joinAndDisplayLocalStream = async () => {
     client.on('user-published', handleUserJoined);
     client.on('user-left', handleUserLeft);
@@ -41,21 +44,24 @@ let joinAndDisplayLocalStream = async () => {
     }
 };
 
+// Función para unirse al stream
 let joinStream = async () => {
-    clearJoinTimeout();
-    const permissionsGranted = await requestPermissions();
+    clearJoinTimeout(); // Limpiar el temporizador si se hace clic
+    const permissionsGranted = await requestPermissions(); // Verificar permisos
 
     if (permissionsGranted) {
+        // Establecer la imagen de fondo
         document.body.style.backgroundImage = "url('./454529.jpg')";
-        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundSize = "cover"; // Asegurarte de que la imagen cubra todo el fondo
 
         await joinAndDisplayLocalStream();
         document.getElementById('join-btn').style.display = 'none';
         document.getElementById('stream-controls').style.display = 'flex';
-        document.querySelector('.lightsaber').style.display = 'block';
+        document.querySelector('.lightsaber').style.display = 'block'; // Mostrar el sable de luz
     }
 };
 
+// Manejar la unión de usuarios remotos
 let handleUserJoined = async (user, mediaType) => {
     remoteUsers[user.uid] = user;
     await client.subscribe(user, mediaType);
@@ -74,16 +80,19 @@ let handleUserJoined = async (user, mediaType) => {
     }
 
     if (mediaType === 'audio') {
-        await user.audioTrack.setMuted(true);
-        user.audioTrack.play();
+        // Asegúrate de que el audio del usuario remoto esté ensordecido
+        await user.audioTrack.setMuted(true); // Silenciar el audio remoto
+        user.audioTrack.play(); // Reproducir el audio, pero como está silenciado, no se oirá
     }
 };
 
+// Manejar la salida de usuarios remotos
 let handleUserLeft = async (user) => {
     delete remoteUsers[user.uid];
     document.getElementById(`user-container-${user.uid}`).remove();
 };
 
+// Dejar el stream y limpiar
 let leaveAndRemoveLocalStream = async () => {
     for (let i = 0; localTracks.length > i; i++) {
         localTracks[i].stop();
@@ -93,14 +102,16 @@ let leaveAndRemoveLocalStream = async () => {
     await client.leave();
     document.getElementById('join-btn').style.display = 'block';
     document.getElementById('stream-controls').style.display = 'none';
-    document.querySelector('.lightsaber').style.display = 'none';
+    document.querySelector('.lightsaber').style.display = 'none'; // Ocultar el sable de luz
     document.getElementById('video-streams').innerHTML = '';
 
+    // Detener la grabación si está en curso
     if (mediaRecorder && mediaRecorder.state !== "inactive") {
         mediaRecorder.stop();
     }
 };
 
+// Alternar micrófono
 let toggleMic = async (e) => {
     if (localTracks[0].muted) {
         await localTracks[0].setMuted(false);
@@ -113,6 +124,7 @@ let toggleMic = async (e) => {
     }
 };
 
+// Alternar cámara
 let toggleCamera = async (e) => {
     if (localTracks[1].muted) {
         await localTracks[1].setMuted(false);
@@ -125,30 +137,35 @@ let toggleCamera = async (e) => {
     }
 };
 
+// Función para limpiar el temporizador
 function clearJoinTimeout() {
     if (joinTimeout) {
         clearTimeout(joinTimeout);
     }
 }
 
+// Iniciar la conexión automáticamente al cargar la página
 async function startConnection() {
     const permissionsGranted = await requestPermissions();
     if (permissionsGranted) {
-        joinStream();
+        joinStream(); // Iniciar conexión si se conceden permisos
     } else {
-        document.getElementById('join-btn').style.display = 'block';
+        document.getElementById('join-btn').style.display = 'block'; // Mantener visible
     }
 }
 
+// Funciones para grabar video al hacer hover sobre el sable
 const sableSound = document.getElementById('sable-sound');
-sableSound.volume = 0.1;
+sableSound.volume = 0.1; // Establecer el volumen al 10%
 
 async function startRecording() {
+    // Asegúrate de que el micrófono no esté silenciado
     if (localTracks[0].muted) {
         await localTracks[0].setMuted(false);
     }
 
-    sableSound.currentTime = 0;
+    // Reproducir el sonido del sable
+    sableSound.currentTime = 0; // Reiniciar el sonido para que se reproduzca desde el inicio
     sableSound.play();
 
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -165,8 +182,8 @@ async function startRecording() {
         const url = URL.createObjectURL(recordedBlob);
         const videoElement = document.getElementById('recorded-video');
         videoElement.src = url;
-        videoElement.style.display = 'block';
-        recordedChunks = [];
+        videoElement.style.display = 'block'; // Mostrar el video grabado
+        recordedChunks = []; // Limpiar los chunks grabados
     };
 
     mediaRecorder.start();
@@ -178,17 +195,22 @@ function stopRecording() {
     }
 }
 
+// Añadir event listeners
 document.getElementById('join-btn').addEventListener('click', joinStream);
 document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream);
 document.getElementById('mic-btn').addEventListener('click', toggleMic);
 document.getElementById('camera-btn').addEventListener('click', toggleCamera);
 document.querySelector('.lightsaber').addEventListener('mouseover', startRecording);
 document.querySelector('.lightsaber').addEventListener('mouseout', stopRecording);
+
+// Iniciar conexión al cargar la página
 document.addEventListener('DOMContentLoaded', startConnection);
 
+// Iniciar la conexión automáticamente al cargar la página
 async function startConnection() {
     const permissionsGranted = await requestPermissions();
+    // Esperar 6 segundos antes de iniciar la conexión
     setTimeout(joinStream, 18000);
 }
 
-//Omni
+//omni 
