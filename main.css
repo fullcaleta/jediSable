@@ -73,9 +73,9 @@ body {
   padding-right: 10rem;
   display: flex;
   justify-content: center;
-  /* Cambiado a center */
+ 
   align-items: flex-end;
-  /* Agregado para centrar verticalmente */
+
   height: 90vh;
   font-size: 13px;
   margin: 0;
@@ -97,8 +97,8 @@ body {
 
   position: relative;
 
-  /* Añadir transición a la opacidad */
-  transition: opacity 0.9s ease; /* Aquí se define el tiempo y tipo de transición */
+  
+  transition: opacity 0.9s ease; 
 }
 
 .neon-button:hover,
@@ -106,8 +106,8 @@ body {
   color: var(--clr-bg);
   text-shadow: none;
   
-  /* Cambiar opacidad al hacer hover */
-  opacity: 0.3; /* Esto hará que el botón se desvanezca */
+ 
+  opacity: 0.3; 
 }
 
 .neon-button:hover::before,
@@ -128,7 +128,7 @@ body {
   height: 0px;
 }
 
-/* no button en este documento  */
+
 .hid_bo {
   position: absolute;
   bottom: 6000px;
@@ -142,7 +142,7 @@ body {
 }
 
 
-/* sable */
+
 
 .lightsaber {
   /* position: relative; Asegura que los elementos hijos se posicionen correctamente */
@@ -260,7 +260,7 @@ video {
   height: 75vh;
   opacity: 0.2;
   display: inline-block;
-  transform: translate(-50%, -50%); /* Ajusta la posición para que el centro del video esté en el centro de la pantalla */
+  transform: translate(-50%, -50%); 
 }
 
 video:hover{
